@@ -8,6 +8,8 @@
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QPainter>
+#include <QClipboard>
+#include <QLayout>
 #include <vector>
 #include <iostream>
 
@@ -27,13 +29,26 @@ public:
     void mouseReleaseEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
     void mouseDoubleClickEvent(QMouseEvent *e);
+    void keyPressEvent(QKeyEvent *e);
 
     void show_bg();
     void draw_rec(vector<QRect> r);
     ~ScreenShot();
 
+private slots:
+    void on_check_clicked();
+
+    void on_cancel_clicked();
+
+    void on_character_clicked();
+
+    void on_rectangle_clicked();
+
 private:
-    bool mousePressed, cutAreaSelected;
+    void copy_img_clipboard();
+    void exit_without_copy();
+
+    bool mousePressed, cutAreaSelected, rectArea;
     int areaPos[4];
     float cutOpa,otherOpa;
     QPixmap bg, cut;

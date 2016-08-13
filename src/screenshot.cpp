@@ -1,4 +1,5 @@
 #include "screenshot.h"
+#include "toolbar.h"
 #include "ui_screenshot.h"
 
 using namespace std;
@@ -9,6 +10,7 @@ ScreenShot::ScreenShot(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->widget->hide();
     show_bg();
     mousePressed = false;
     cutAreaSelected = false;
@@ -30,6 +32,7 @@ void ScreenShot::mousePressEvent(QMouseEvent *e)
     if(px>=areaPos[0] && px<=areaPos[2] && py>=areaPos[1] && py<=areaPos[3]) {
         cutAreaSelected = true;
     } else {
+        ui->widget->hide();
         cutAreaSelected = false;
     }
 }
@@ -37,6 +40,8 @@ void ScreenShot::mousePressEvent(QMouseEvent *e)
 //Release mouse means cut area is selected
 void ScreenShot::mouseReleaseEvent(QMouseEvent *e)
 {
+    ui->widget->move(areaPos[2]-ui->widget->width(), areaPos[3]);
+    ui->widget->show();
     mousePressed = false;
 }
 
@@ -96,7 +101,19 @@ void ScreenShot::mouseMoveEvent(QMouseEvent *e)
 //Exit program when mouse double click
 void ScreenShot::mouseDoubleClickEvent(QMouseEvent *e)
 {
-    QApplication::exit();
+    exit_without_copy();
+}
+
+//Save file to clipbord when pressing return or enter
+//Exit programe when pressing esc
+void ScreenShot::keyPressEvent(QKeyEvent *e)
+{
+    if(e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
+        copy_img_clipboard();
+        QApplication::exit();
+    } else if(e->key() == Qt::Key_Escape) {
+        exit_without_copy();
+    }
 }
 
 //Get the background image and set it to the label.
@@ -115,7 +132,7 @@ void ScreenShot::draw_rec(vector<QRect> r)
     QPen pen = painter.pen();
     pen.setStyle(Qt::NoPen);
     painter.setPen(pen);
-    for(int i=0; i<r.size(); i++) {
+    for(int i=r.size()-1; i>=0; i--) {
         if(0 == i) {
             painter.setBrush(Qt::white);
             painter.setOpacity(cutOpa);
@@ -131,4 +148,37 @@ void ScreenShot::draw_rec(vector<QRect> r)
 ScreenShot::~ScreenShot()
 {
     delete ui;
+}
+
+void ScreenShot::copy_img_clipboard()
+{
+    QClipboard *clip = QApplication::clipboard();
+    clip->setPixmap(bg.grabWindow(NULL, areaPos[0], areaPos[1],
+                    areaPos[2]-areaPos[0], areaPos[3]-areaPos[1]));
+}
+
+void ScreenShot::exit_without_copy()
+{
+    QApplication::exit();
+}
+
+void ScreenShot::on_check_clicked()
+{
+    copy_img_clipboard();
+    QApplication::exit();
+}
+
+void ScreenShot::on_cancel_clicked()
+{
+    exit_without_copy();
+}
+
+void ScreenShot::on_character_clicked()
+{
+
+}
+
+void ScreenShot::on_rectangle_clicked()
+{
+    rectArea = true;
 }
