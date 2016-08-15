@@ -6,12 +6,12 @@
 #include <QWidget>
 #include <QScreen>
 #include <QMouseEvent>
-#include <QPaintEvent>
 #include <QPainter>
 #include <QClipboard>
-#include <QLayout>
-#include <vector>
+#include <QVector>
+#include <QStack>
 #include <iostream>
+#include "draw.h"
 
 namespace Ui {
 class ScreenShot;
@@ -32,7 +32,11 @@ public:
     void keyPressEvent(QKeyEvent *e);
 
     void show_bg();
-    void draw_rec(vector<QRect> r);
+    void draw_all(int move);
+    void draw_cut();
+    void draw_rec(QRect r);
+    void draw_cicle(QRect r);
+    void draw_arrow(QRect r);
     ~ScreenShot();
 
 private slots:
@@ -42,17 +46,32 @@ private slots:
 
     void on_character_clicked();
 
-    void on_rectangle_clicked();
+    void on_rectan_clicked();
+
+    void on_round_clicked();
+
+    void on_arrow_clicked();
 
 private:
+    void clrButtonClicks(int k);
+    int selectArea(int x, int y);
+    bool ifButtonClicked();
+    void update_around_area();
     void copy_img_clipboard();
     void exit_without_copy();
 
-    bool mousePressed, cutAreaSelected, rectArea;
-    int areaPos[4];
+    bool mousePressed, cutAreaExits, cutAreaSelected;
+    bool buttonClick[4];
+    int drawShape, sa;
+    int areaPos[4];    
     float cutOpa,otherOpa;
-    QPixmap bg, cut;
+    QPixmap bg, cut, top;
     QPoint begin_point;
+    QVector<QRect> aroundArea;
+    QVector<draw> drawHis;
+    QStack<QVector<draw>> wholeHis;
+    draw topDrawPoint;
+    draw *dropDrawEle;
 
     Ui::ScreenShot *ui;
 };

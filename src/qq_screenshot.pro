@@ -14,10 +14,10 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         screenshot.cpp \
-    drawqueue.cpp
+    draw.cpp
 
 HEADERS  += screenshot.h \
-    drawqueue.h
+    draw.h
 
 FORMS    += screenshot.ui
 
