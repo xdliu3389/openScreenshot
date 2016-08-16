@@ -2,6 +2,7 @@
 
 draw::draw()
 {
+    move = false;
     color = Qt::red;
     width = 3;
 }

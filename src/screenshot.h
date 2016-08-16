@@ -12,6 +12,12 @@
 #include <QStack>
 #include <iostream>
 #include "draw.h"
+#include "areapos.h"
+
+#define CLICKCUTAREA -1
+#define CLICKOUTSIDE -2
+#define CUTOPA 0.0
+#define AROUNDOPA 0.6
 
 namespace Ui {
 class ScreenShot;
@@ -32,7 +38,7 @@ public:
     void keyPressEvent(QKeyEvent *e);
 
     void show_bg();
-    void draw_all(int move);
+    void draw_all();
     void draw_cut();
     void draw_rec(QRect r);
     void draw_cicle(QRect r);
@@ -56,20 +62,20 @@ private:
     void clrButtonClicks(int k);
     int selectArea(int x, int y);
     bool ifButtonClicked();
+    void update_mouse_position();
     void update_around_area();
     void copy_img_clipboard();
     void exit_without_copy();
+    void swap(int &n1, int &n2);
 
     bool mousePressed, cutAreaExits, cutAreaSelected;
     bool buttonClick[4];
-    int drawShape, sa;
-    int areaPos[4];    
-    float cutOpa,otherOpa;
+    int sa;
+    areaPos ap, mp, dp, bound; //ap--->area_position, mp--->mouse_position, dp--->dynamic_position
     QPixmap bg, cut, top;
     QPoint begin_point;
     QVector<QRect> aroundArea;
     QVector<draw> drawHis;
-    QStack<QVector<draw>> wholeHis;
     draw topDrawPoint;
     draw *dropDrawEle;
 

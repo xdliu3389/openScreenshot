@@ -14,10 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         screenshot.cpp \
-    draw.cpp
+    draw.cpp \
+    areapos.cpp
 
 HEADERS  += screenshot.h \
-    draw.h
+    draw.h \
+    areapos.h
 
 FORMS    += screenshot.ui
 

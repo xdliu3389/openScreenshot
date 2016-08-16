@@ -15,32 +15,30 @@ ScreenShot::ScreenShot(QWidget *parent) :
     mousePressed = false;
     cutAreaExits = false;
     cutAreaSelected = false;
-    cutOpa = 0.0;
-    otherOpa = 0.6;
 
     for(int i=0; i<sizeof(buttonClick)/sizeof(buttonClick[0]); i++)
         buttonClick[i] = false;
 
-    for(int i=0; i<sizeof(areaPos)/sizeof(areaPos[0]); i++)
-        areaPos[i] = -1;
 }
 
 //If the press point is in the cut area before, then move mouse means move this cut area.
 //If the press point is out of the previous area, then move mouse means draw a new cut area.
 void ScreenShot::mousePressEvent(QMouseEvent *e)
 {
+    bound = areaPos(0, 0, this->width(), this->height());
     int px = e->pos().x(), py = e->pos().y();
     mousePressed = true;
 
-    begin_point.setX(e->pos().x());
-    begin_point.setY(e->pos().y());
+    //ap.initBxy(e->pos());
+    mp.initBxy(e->pos());
+    dp.initBxy(e->pos());
 
     sa = selectArea(px, py);
 
     if(ifButtonClicked())
-        draw_all(0);
+        draw_all();
 
-    if(-1 == sa) {
+    if(CLICKOUTSIDE == sa) {
         drawHis.clear();
         ui->widget->hide();
     }
@@ -55,14 +53,12 @@ void ScreenShot::mouseReleaseEvent(QMouseEvent *e)
         if(buttonClick[i]) {
             draw t;
             t.setShape(i);
-            t.setPt(QRect(begin_point.x(), begin_point.y(), e->pos().x()-begin_point.x(), e->pos().y()-begin_point.y()));
+            t.setPt(QRect(mp.bx(), mp.by(), mp.ex()-mp.bx(), mp.ey()-mp.by()));
             drawHis.push_back(t);
         }
     }
-    if(sa != -1)
-        wholeHis.push_back(drawHis);
 
-    ui->widget->move(areaPos[2]-ui->widget->width(), areaPos[3]);
+    ui->widget->move(ap.ex()-ui->widget->width(), ap.ey());
     ui->widget->show();
     mousePressed = false;
 }
@@ -72,19 +68,25 @@ void ScreenShot::mouseMoveEvent(QMouseEvent *e)
 {
     vector<QRect> pr;
     QRect r;
-    int bx, by, ex, ey;
 
-    //bx,by is the begin_point(left-up point) of the rectangle.
-    //ex,ey is the end_point(right-down point) of the rectangle.
-    bx = begin_point.x()>e->pos().x()?e->pos().x():begin_point.x();
-    ex = begin_point.x()>e->pos().x()?begin_point.x():e->pos().x();
-    by = begin_point.y()>e->pos().y()?e->pos().y():begin_point.y();
-    ey = begin_point.y()>e->pos().y()?begin_point.y():e->pos().y();
+    mp.initExy(e->pos());
+
+    //We have to get mxy before dp=mp.normalPos()
+    //after dp=mp.normalPos(), the mxy will be >0 forever.
+    dp.initExy(e->pos());
+    QPoint mxy = dp.disBE();
+
+    //we get the correct position:ex is bigger than bx, ey is bigger than by
+    //Because mp is the mouse position, so the mp store the press point. While dp not.
+    dp = mp.normalPos();
+
+    //update_mouse_position();
 
     if(ifButtonClicked()) {
         QRect t;
-        t.setX(bx); t.setY(by);
-        t.setWidth(ex - bx); t.setHeight(ey - by);
+        dp.resetPosIn(ap);
+        t.setX(dp.bx()); t.setY(dp.by());
+        t.setWidth(dp.ex() - dp.bx()); t.setHeight(dp.ey() - dp.by());
         for(int i=0; i<sizeof(buttonClick)/sizeof(buttonClick[0]); i++) {
             if(buttonClick[i]) {
                 switch (i) {
@@ -99,35 +101,38 @@ void ScreenShot::mouseMoveEvent(QMouseEvent *e)
                 }
             }
         }
-
     } else {
-        if(mousePressed && sa != -1) {
-            int mx = e->pos().x() - begin_point.x(), my = e->pos().y() - begin_point.y();
-            if(0 == sa) {
-                bx = areaPos[0] + mx; by = areaPos[1] + my;
-                ex = areaPos[2] + mx; ey = areaPos[3] + my;
+        areaPos tmp = dp;
+        if(mousePressed && sa != CLICKOUTSIDE) {
+            if(CLICKCUTAREA == sa) {
+                dp = ap;
+                if(!dp.outBound(bound, mxy))
+                    dp.move(mxy);
                 for(int i=0; i<drawHis.size(); i++) {
                     QRect t = drawHis[i].getPt();
-                    t.moveTo(t.x()+mx, t.y()+my);
+                    t.moveTo(t.x() + mxy.x(), t.y() + mxy.y());
                     drawHis[i].setPt(t);
                 }
             } else {
-                bx = areaPos[0]; by = areaPos[1];
-                ex = areaPos[2]; ey = areaPos[3];
+                dp = ap;
                 QRect t = dropDrawEle->getPt();
-                t.moveTo(t.x()+mx, t.y()+my);
+                areaPos b(t.x(), t.y(), t.x()+t.width(), t.y()+t.height());
+                if(!b.outBound(ap, mxy))
+                    t.moveTo(t.x() + mxy.x(), t.y() + mxy.y());
                 dropDrawEle->setPt(t);
             }
+            tmp = dp;
+
             //update the new begin_point can avoid big shake when drag the cut area.
-            begin_point.setX(e->pos().x()); begin_point.setY(e->pos().y());
+            dp.initBxy(e->pos());
         }
 
         //No matter the press point is in or out of cut area. We both need update cut area position.
-        areaPos[0] = bx; areaPos[1] = by; areaPos[2] = ex; areaPos[3] = ey;
+        ap = tmp;
 
         update_around_area();
 
-        draw_all(1);
+        draw_all();
     }
 }
 
@@ -147,10 +152,7 @@ void ScreenShot::keyPressEvent(QKeyEvent *e)
     } else if(e->key() == Qt::Key_Escape) {
         exit_without_copy();
     } else if(e->key() == Qt::Key_Z && e->modifiers().testFlag(Qt::ControlModifier)) {
-        cout << "ctrl z" << endl;
-        if(!wholeHis.empty())
-            wholeHis.pop();
-        draw_all(0);
+
     }
 }
 
@@ -165,27 +167,21 @@ void ScreenShot::show_bg()
 }
 
 //Update current draw.
-void ScreenShot::draw_all(int move)
+void ScreenShot::draw_all()
 {
     draw_cut();
 
     QPainter painter(&top);
     QPen pen = painter.pen();
 
-    QVector<draw> last;
-    if(1 == move)
-        last = drawHis;
-    else if(!wholeHis.empty())
-        last = wholeHis.top();
+    for(int i=0; i<drawHis.size(); i++) {
+        QRect r = drawHis[i].getPt();
 
-    for(int i=0; i<last.size(); i++) {
-        QRect r = last[i].getPt();
-
-        pen.setColor(last[i].getColor());
-        pen.setWidth(last[i].getWidth());
+        pen.setColor(drawHis[i].getColor());
+        pen.setWidth(drawHis[i].getWidth());
         painter.setPen(pen);
 
-        switch(last[i].getShape()) {
+        switch(drawHis[i].getShape()) {
         case 0:
             painter.drawRect(r); break;
         case 1:
@@ -196,7 +192,6 @@ void ScreenShot::draw_all(int move)
             break;
         }
     }
-
     ui->label->setPixmap(top);
 }
 
@@ -209,12 +204,12 @@ void ScreenShot::draw_cut()
     painter.setPen(pen);
 
     painter.setBrush(Qt::white);
-    painter.setOpacity(cutOpa);
-    painter.drawRect(areaPos[0], areaPos[1], areaPos[2]-areaPos[0], areaPos[3]-areaPos[1]);
+    painter.setOpacity(CUTOPA);
+    painter.drawRect(ap.bx(), ap.by(), ap.ex()-ap.bx(), ap.ey()-ap.by());
 
     for(int i=0; i<aroundArea.size(); i++) {
         painter.setBrush(Qt::gray);
-        painter.setOpacity(otherOpa);
+        painter.setOpacity(AROUNDOPA);
         painter.drawRect(aroundArea[i]);
     }
 
@@ -277,16 +272,16 @@ int ScreenShot::selectArea(int x, int y)
         QRect t = drawHis[i].getPt();
         if(x>t.x() && x<(t.x()+t.width()) && y>t.y() && y<(t.y()+t.height())) {
             dropDrawEle = &drawHis[i];
-            return 1;
+            return i;
         }
     }
 
     //The click place is on no element but in the cut area
-    if(x>=areaPos[0] && x<=areaPos[2] && y>=areaPos[1] && y<=areaPos[3])
-        return 0;
+    if(x>=ap.bx() && x<=ap.ex() && y>=ap.by() && y<=ap.ey())
+        return CLICKCUTAREA;
 
     //The click place is out of cut area
-    return -1;
+    return CLICKOUTSIDE;
 }
 
 bool ScreenShot::ifButtonClicked()
@@ -297,6 +292,23 @@ bool ScreenShot::ifButtonClicked()
     return f;
 }
 
+void ScreenShot::update_mouse_position()
+{
+    int bx, by, ex, ey, tmp;
+    bx = dp.bx();
+    by = dp.by();
+    ex = dp.ex();
+    ey = dp.ey();
+    if(bx > ex)
+        swap(bx, ex);
+    if(by > ey)
+        swap(by, ey);
+    dp.setBx(bx);
+    dp.setBy(by);
+    dp.setEx(ex);
+    dp.setEy(ey);
+}
+
 void ScreenShot::update_around_area()
 {
     aroundArea.clear();
@@ -304,35 +316,44 @@ void ScreenShot::update_around_area()
     QRect tmp;
     //up of cut area
     tmp.setX(0); tmp.setY(0);
-    tmp.setWidth(this->width()); tmp.setHeight(areaPos[1]);
+    tmp.setWidth(this->width()); tmp.setHeight(ap.by());
     aroundArea.push_back(tmp);
 
     //left of cut area
-    tmp.setX(0); tmp.setY(areaPos[1]);
-    tmp.setWidth(areaPos[0]); tmp.setHeight(areaPos[3] - areaPos[1]);
+    tmp.setX(0); tmp.setY(ap.by());
+    tmp.setWidth(ap.bx()); tmp.setHeight(ap.ey() - ap.by());
     aroundArea.push_back(tmp);
 
     //right of cut area
-    tmp.setX(areaPos[2]); tmp.setY(areaPos[1]);
-    tmp.setWidth(this->width() - areaPos[2]); tmp.setHeight(areaPos[3] - areaPos[1]);
+    tmp.setX(ap.ex()); tmp.setY(ap.by());
+    tmp.setWidth(this->width() - ap.ex()); tmp.setHeight(ap.ey() - ap.by());
     aroundArea.push_back(tmp);
 
     //down of cut area
-    tmp.setX(0); tmp.setY(areaPos[3]);
-    tmp.setWidth(this->width()); tmp.setHeight(this->height() - areaPos[3]);
+    tmp.setX(0); tmp.setY(ap.ey());
+    cout << "caonimagebi:" << this->width() << endl;
+    tmp.setWidth(this->width()); tmp.setHeight(this->height() - ap.ey());
     aroundArea.push_back(tmp);
 }
 
 void ScreenShot::copy_img_clipboard()
 {
     QClipboard *clip = QApplication::clipboard();
-    clip->setPixmap(bg.grabWindow(NULL, areaPos[0], areaPos[1],
-                    areaPos[2]-areaPos[0], areaPos[3]-areaPos[1]));
+    clip->setPixmap(bg.grabWindow(NULL, ap.bx(), ap.by(),
+                    ap.ex()-ap.bx(), ap.ey()-ap.by()));
 }
 
 void ScreenShot::exit_without_copy()
 {
     QApplication::exit();
+}
+
+void ScreenShot::swap(int &n1, int &n2)
+{
+    int t;
+    t = n1;
+    n1 = n2;
+    n2 = t;
 }
 
 void ScreenShot::on_check_clicked()

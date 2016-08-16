@@ -16,7 +16,6 @@ public:
     int getWidth();
     float getOpa();
     bool isMove();
-    QPoint getNewPos();
     QRect getPt();
     QBrush getBrush();
     QColor getColor();
@@ -30,14 +29,18 @@ public:
     void setColor(QColor c);
 
 private:
+    //Draw shape information
     int shape;
     int width;
     float opa;
-    bool move;
-    QPoint newPos;
     QRect pt;
     QBrush brush;
     QColor color;
+
+    //Move information
+    int shapeId;
+    QPoint mvXY;
+    bool move;
 };
 
 #endif // DRAW_H
