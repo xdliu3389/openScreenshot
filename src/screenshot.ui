@@ -33,16 +33,19 @@
    <widget class="QWidget" name="widget" native="true">
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>440</y>
-      <width>151</width>
-      <height>31</height>
+      <x>490</x>
+      <y>410</y>
+      <width>171</width>
+      <height>41</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-image:url(:/imgs/1 (6).jpg)</string>
     </property>
     <widget class="QPushButton" name="arrow">
      <property name="geometry">
       <rect>
-       <x>70</x>
+       <x>60</x>
        <y>10</y>
        <width>21</width>
        <height>21</height>
@@ -55,7 +58,7 @@
     <widget class="QPushButton" name="check">
      <property name="geometry">
       <rect>
-       <x>130</x>
+       <x>150</x>
        <y>10</y>
        <width>21</width>
        <height>21</height>
@@ -84,7 +87,7 @@
     <widget class="QPushButton" name="cancel">
      <property name="geometry">
       <rect>
-       <x>110</x>
+       <x>120</x>
        <y>10</y>
        <width>21</width>
        <height>21</height>
@@ -100,7 +103,7 @@
     <widget class="QPushButton" name="round">
      <property name="geometry">
       <rect>
-       <x>50</x>
+       <x>30</x>
        <y>10</y>
        <width>21</width>
        <height>21</height>
@@ -113,7 +116,7 @@
     <widget class="QPushButton" name="rectan">
      <property name="geometry">
       <rect>
-       <x>30</x>
+       <x>0</x>
        <y>10</y>
        <width>21</width>
        <height>21</height>

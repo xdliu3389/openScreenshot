@@ -35,6 +35,8 @@ void ScreenShot::mousePressEvent(QMouseEvent *e)
 
     sa = selectArea(px, py);
 
+    //cout << ap.bx() << "," << ap.by() << ";" << ap.ex() << "," << ap.ey() << endl;
+
     if(ifButtonClicked())
         draw_all();
 
@@ -104,22 +106,15 @@ void ScreenShot::mouseMoveEvent(QMouseEvent *e)
     } else {
         areaPos tmp = dp;
         if(mousePressed && sa != CLICKOUTSIDE) {
-            if(CLICKCUTAREA == sa) {
-                dp = ap;
-                if(!dp.outBound(bound, mxy))
-                    dp.move(mxy);
+            cout << "clickcutarea" << endl;
+            dp = ap;
+            if(!dp.outBound(bound, mxy)) {
+                dp.move(mxy);
                 for(int i=0; i<drawHis.size(); i++) {
                     QRect t = drawHis[i].getPt();
                     t.moveTo(t.x() + mxy.x(), t.y() + mxy.y());
                     drawHis[i].setPt(t);
                 }
-            } else {
-                dp = ap;
-                QRect t = dropDrawEle->getPt();
-                areaPos b(t.x(), t.y(), t.x()+t.width(), t.y()+t.height());
-                if(!b.outBound(ap, mxy))
-                    t.moveTo(t.x() + mxy.x(), t.y() + mxy.y());
-                dropDrawEle->setPt(t);
             }
             tmp = dp;
 
@@ -143,16 +138,21 @@ void ScreenShot::mouseDoubleClickEvent(QMouseEvent *e)
 }
 
 //Save file to clipbord when pressing return or enter
-//Exit programe when pressing esc
+//Clear draw buttons click when pressing esc
 void ScreenShot::keyPressEvent(QKeyEvent *e)
 {
     if(e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
         copy_img_clipboard();
         QApplication::exit();
     } else if(e->key() == Qt::Key_Escape) {
-        exit_without_copy();
-    } else if(e->key() == Qt::Key_Z && e->modifiers().testFlag(Qt::ControlModifier)) {
+        clrButtonClicks(-1);
+    } else if(e->key() == Qt::Key_Delete) {
+        if(sa >= 0) {
+            drawHis.erase(selectIt);
 
+            sa = CLICKCUTAREA;
+            draw_all();
+        }
     }
 }
 
@@ -270,8 +270,8 @@ int ScreenShot::selectArea(int x, int y)
     //The click place is on the element in the cut area
     for(int i=0; i<drawHis.size(); i++) {
         QRect t = drawHis[i].getPt();
-        if(x>t.x() && x<(t.x()+t.width()) && y>t.y() && y<(t.y()+t.height())) {
-            dropDrawEle = &drawHis[i];
+        if(x>=t.x() && y>=t.y() && x<=t.x()+t.width() && y<t.y()+t.height()) {
+            selectIt = &drawHis[i];
             return i;
         }
     }
@@ -331,7 +331,6 @@ void ScreenShot::update_around_area()
 
     //down of cut area
     tmp.setX(0); tmp.setY(ap.ey());
-    cout << "caonimagebi:" << this->width() << endl;
     tmp.setWidth(this->width()); tmp.setHeight(this->height() - ap.ey());
     aroundArea.push_back(tmp);
 }

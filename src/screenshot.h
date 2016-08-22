@@ -76,6 +76,7 @@ private:
     QPoint begin_point;
     QVector<QRect> aroundArea;
     QVector<draw> drawHis;
+    QVector<draw>::iterator selectIt;
     draw topDrawPoint;
     draw *dropDrawEle;
 
