@@ -11,6 +11,7 @@
 #include <QVector>
 #include <QStack>
 #include <iostream>
+#include <string>
 #include "draw.h"
 #include "areapos.h"
 
@@ -59,10 +60,16 @@ private slots:
     void on_arrow_clicked();
 
 private:
+    void init_widgets();
     void clrButtonClicks(int k);
     int selectArea(int x, int y);
     bool ifButtonClicked();
     void update_mouse_position();
+    void update_imgview_area(int px, int py);
+    void update_img_rgb_area(int px, int py);
+    void update_size_font(int px, int py);
+    void update_size_area(int px, int py);
+    void update_drawbutton_area();
     void update_around_area();
     void copy_img_clipboard();
     void exit_without_copy();
@@ -73,7 +80,7 @@ private:
     int sa;
     areaPos ap, mp, dp, bound; //ap--->area_position, mp--->mouse_position, dp--->dynamic_position
     QPixmap bg, cut, top;
-    QPoint begin_point;
+    QPoint imgPos, sizePos, buttonPos;
     QVector<QRect> aroundArea;
     QVector<draw> drawHis;
     QVector<draw>::iterator selectIt;

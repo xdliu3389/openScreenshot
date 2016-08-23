@@ -8,8 +8,22 @@ ScreenShot::ScreenShot(QWidget *parent) :
     ui(new Ui::ScreenShot)
 {
     ui->setupUi(this);
+    this->setMouseTracking(true);
+    ui->label->setMouseTracking(true);
+    ui->centralWidget->setMouseTracking(true);
 
+    init_widgets();
+}
+
+//Set all the widgets initial position and status
+void ScreenShot::init_widgets()
+{
+    //Hide most widget in the begining of program
     ui->widget->hide();
+    ui->SizeRgbDisplay->setStyleSheet("background-color: rgb(0, 0, 0, 98);");
+    ui->SizeRgbDisplay->hide();
+    ui->ImgShow->hide();
+
     show_bg();
 
     mousePressed = false;
@@ -18,7 +32,6 @@ ScreenShot::ScreenShot(QWidget *parent) :
 
     for(int i=0; i<sizeof(buttonClick)/sizeof(buttonClick[0]); i++)
         buttonClick[i] = false;
-
 }
 
 //If the press point is in the cut area before, then move mouse means move this cut area.
@@ -34,8 +47,6 @@ void ScreenShot::mousePressEvent(QMouseEvent *e)
     dp.initBxy(e->pos());
 
     sa = selectArea(px, py);
-
-    //cout << ap.bx() << "," << ap.by() << ";" << ap.ex() << "," << ap.ey() << endl;
 
     if(ifButtonClicked())
         draw_all();
@@ -55,7 +66,8 @@ void ScreenShot::mouseReleaseEvent(QMouseEvent *e)
         if(buttonClick[i]) {
             draw t;
             t.setShape(i);
-            t.setPt(QRect(mp.bx(), mp.by(), mp.ex()-mp.bx(), mp.ey()-mp.by()));
+            cout << "dpbx:" << dp.bx() << ";apbx:" << ap.bx() << endl;
+            t.setPt(QRect(dp.bx()-ap.bx(), dp.by()-ap.by(), dp.ex()-dp.bx(), dp.ey()-dp.by()));
             drawHis.push_back(t);
         }
     }
@@ -68,66 +80,69 @@ void ScreenShot::mouseReleaseEvent(QMouseEvent *e)
 //Deal with select cut area, show different color and Opacity between cut area and other areas.
 void ScreenShot::mouseMoveEvent(QMouseEvent *e)
 {
-    vector<QRect> pr;
-    QRect r;
+    update_imgview_area(e->pos().x(), e->pos().y());
 
-    mp.initExy(e->pos());
+    update_size_font(e->pos().x(), e->pos().y());
 
-    //We have to get mxy before dp=mp.normalPos()
-    //after dp=mp.normalPos(), the mxy will be >0 forever.
-    dp.initExy(e->pos());
-    QPoint mxy = dp.disBE();
+    if(mousePressed) {
+        vector<QRect> pr;
+        QRect r;
 
-    //we get the correct position:ex is bigger than bx, ey is bigger than by
-    //Because mp is the mouse position, so the mp store the press point. While dp not.
-    dp = mp.normalPos();
+        mp.initExy(e->pos());
 
-    //update_mouse_position();
+        //We have to get mxy before dp=mp.normalPos()
+        //after dp=mp.normalPos(), the mxy will be >0 forever.
+        dp.initExy(e->pos());
+        QPoint mxy = dp.disBE();
 
-    if(ifButtonClicked()) {
-        QRect t;
-        dp.resetPosIn(ap);
-        t.setX(dp.bx()); t.setY(dp.by());
-        t.setWidth(dp.ex() - dp.bx()); t.setHeight(dp.ey() - dp.by());
-        for(int i=0; i<sizeof(buttonClick)/sizeof(buttonClick[0]); i++) {
-            if(buttonClick[i]) {
-                switch (i) {
-                case 0:
-                    draw_rec(t); break;
-                case 1:
-                    draw_cicle(t); break;
-                case 2:
-                    break;
-                case 3:
-                    break;
+        //we get the correct position:ex is bigger than bx, ey is bigger than by
+        //Because mp is the mouse position, so the mp store the press point. While dp not.
+        dp = mp.normalPos();
+
+
+        if(ifButtonClicked()) {
+            QRect t;
+            dp.resetPosIn(ap);
+            t.setX(dp.bx()); t.setY(dp.by());
+            t.setWidth(dp.ex() - dp.bx()); t.setHeight(dp.ey() - dp.by());
+            for(int i=0; i<sizeof(buttonClick)/sizeof(buttonClick[0]); i++) {
+                if(buttonClick[i]) {
+                    switch (i) {
+                    case 0:
+                        draw_rec(t); break;
+                    case 1:
+                        draw_cicle(t); break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    }
                 }
             }
-        }
-    } else {
-        areaPos tmp = dp;
-        if(mousePressed && sa != CLICKOUTSIDE) {
-            cout << "clickcutarea" << endl;
-            dp = ap;
-            if(!dp.outBound(bound, mxy)) {
-                dp.move(mxy);
-                for(int i=0; i<drawHis.size(); i++) {
-                    QRect t = drawHis[i].getPt();
-                    t.moveTo(t.x() + mxy.x(), t.y() + mxy.y());
-                    drawHis[i].setPt(t);
+        } else {
+            areaPos tmp = dp;
+            if(sa != CLICKOUTSIDE) {
+                dp = ap;
+                if(!dp.outBound(bound, mxy)) {
+                    dp.move(mxy);
                 }
+                tmp = dp;
+
+                //update the new begin_point can avoid big shake when drag the cut area.
+                dp.initBxy(e->pos());
             }
-            tmp = dp;
 
-            //update the new begin_point can avoid big shake when drag the cut area.
-            dp.initBxy(e->pos());
+            //No matter the press point is in or out of cut area. We both need update cut area position.
+            ap = tmp;
+
+            update_img_rgb_area(e->pos().x(), e->pos().y());
+
+            update_drawbutton_area();
+
+            update_around_area();
+
+            draw_all();
         }
-
-        //No matter the press point is in or out of cut area. We both need update cut area position.
-        ap = tmp;
-
-        update_around_area();
-
-        draw_all();
     }
 }
 
@@ -145,11 +160,12 @@ void ScreenShot::keyPressEvent(QKeyEvent *e)
         copy_img_clipboard();
         QApplication::exit();
     } else if(e->key() == Qt::Key_Escape) {
+        ui->rectan->setStyleSheet("border-image: url(:/imgs/rec.png);");
+        ui->round->setStyleSheet("border-image: url(:/imgs/round.png);");
         clrButtonClicks(-1);
     } else if(e->key() == Qt::Key_Delete) {
         if(sa >= 0) {
             drawHis.erase(selectIt);
-
             sa = CLICKCUTAREA;
             draw_all();
         }
@@ -176,6 +192,11 @@ void ScreenShot::draw_all()
 
     for(int i=0; i<drawHis.size(); i++) {
         QRect r = drawHis[i].getPt();
+        int w = r.width(), h = r.height();
+        r.setX(r.x()+ap.bx());
+        r.setY(r.y()+ap.by());
+        r.setWidth(w);
+        r.setHeight(h);
 
         pen.setColor(drawHis[i].getColor());
         pen.setWidth(drawHis[i].getWidth());
@@ -309,6 +330,81 @@ void ScreenShot::update_mouse_position()
     dp.setEy(ey);
 }
 
+void ScreenShot::update_imgview_area(int px, int py)
+{
+    areaPos square;
+    square.setBx(px - ui->ImgShow->width()/2+1);
+    square.setBy(py - ui->ImgShow->height()/2+1);
+    square.setEx(px + ui->ImgShow->width()/2-1);
+    square.setEy(py + ui->ImgShow->height()/2-1);
+
+    //Set square pixmap in the left-upper position
+    QPixmap squarePixmap = bg.grabWindow(NULL, square.bx(), square.by(), square.ex()-square.bx(), square.ey()-square.by());
+    QGraphicsScene *scene = new QGraphicsScene();
+    scene->addPixmap(squarePixmap);
+    ui->ImgShow->setScene(scene);
+}
+
+void ScreenShot::update_img_rgb_area(int px, int py)
+{
+
+    int w = ui->ImgStrip->width();
+    int h = ui->ImgStrip->height();
+    if(ap.by()-h > 0) {
+        imgPos.setX(ap.bx());
+        imgPos.setY(ap.by()-h);
+    } else if(ap.bx()-w > 0) {
+        imgPos.setX(ap.bx()-w);
+        imgPos.setY(ap.by());
+    } else if(ap.ex()+w < this->width()) {
+        imgPos.setX(ap.ex());
+        imgPos.setY(ap.by());
+    } else {
+        imgPos.setX(ap.bx());
+        imgPos.setY(ap.by());
+    }
+    ui->ImgStrip->move(imgPos);
+
+    ui->ImgShow->show();
+    ui->SizeRgbDisplay->show();
+}
+
+void ScreenShot::update_size_font(int px, int py)
+{
+    QImage tmp = top.toImage();
+    QColor colorRes = tmp.pixelColor(px, py);
+    int r = colorRes.red();
+    int g = colorRes.green();
+    int b = colorRes.blue();
+    string s = "<font style='color:white; font-size:10px; font-weight:bold;'>RGB:";
+    s += to_string(r)+","+to_string(g)+","+to_string(b)+")<br>";
+    s += "Size:(";
+    s += to_string(ap.ex()-ap.bx());
+    s += ",";
+    s += to_string(ap.ey()-ap.by());
+    s += ")</font><br><br><font style='color:white; font-size:9px;'>Double-click to exit the screenshot</font>";
+
+    ui->SizeRgbDisplay->setHtml(QString::fromStdString(s));
+}
+
+void ScreenShot::update_drawbutton_area()
+{
+    int w = ui->widget->width();
+    int h = ui->widget->height();
+    if(ap.ey()+h < this->height()) {
+        buttonPos.setX(ap.ex()-w);
+        buttonPos.setY(ap.ey());
+    } else if(ap.by()-h > 0) {
+        buttonPos.setX(ap.ex()-w);
+        buttonPos.setY(ap.by()-h);
+    } else {
+        buttonPos.setX(ap.ex()-w);
+        buttonPos.setY(ap.by());
+    }
+
+    ui->widget->move(buttonPos);
+}
+
 void ScreenShot::update_around_area()
 {
     aroundArea.clear();
@@ -374,12 +470,24 @@ void ScreenShot::on_character_clicked()
 
 void ScreenShot::on_rectan_clicked()
 {
+    if(!buttonClick[0]) {
+        ui->rectan->setStyleSheet("border-image: url(:/imgs/rec_press.png);");
+        ui->round->setStyleSheet("border-image: url(:/imgs/round.png);");
+    } else {
+        ui->rectan->setStyleSheet("border-image: url(:/imgs/rec.png);");
+    }
     clrButtonClicks(0);
     buttonClick[0] = !buttonClick[0];
 }
 
 void ScreenShot::on_round_clicked()
 {
+    if(!buttonClick[1]) {
+        ui->rectan->setStyleSheet("border-image: url(:/imgs/rec.png);");
+        ui->round->setStyleSheet("border-image: url(:/imgs/round_press.png);");
+    } else {
+        ui->round->setStyleSheet("border-image: url(:/imgs/round.png);");
+    }
     clrButtonClicks(1);
     buttonClick[1] = !buttonClick[1];
 }

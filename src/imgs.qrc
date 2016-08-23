@@ -1,8 +1,14 @@
 <RCC>
     <qresource prefix="/imgs">
-        <file>1 (7).jpg</file>
-        <file>1 (16).jpg</file>
         <file>1 (6).jpg</file>
-        <file>1 (1).jpg</file>
+        <file>rec.png</file>
+        <file>round.png</file>
+        <file>check.png</file>
+        <file>cancel.png</file>
+        <file>cancel_press.png</file>
+        <file>check_press.png</file>
+        <file>rec_press.png</file>
+        <file>round_press.png</file>
+        <file>Rectangle-50.png</file>
     </qresource>
 </RCC>

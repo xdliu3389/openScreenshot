@@ -15,12 +15,15 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QLabel" name="label">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>671</width>
-      <height>471</height>
+      <width>681</width>
+      <height>481</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -33,19 +36,22 @@
    <widget class="QWidget" name="widget" native="true">
     <property name="geometry">
      <rect>
-      <x>490</x>
-      <y>410</y>
-      <width>171</width>
+      <x>460</x>
+      <y>420</y>
+      <width>191</width>
       <height>41</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-image:url(:/imgs/1 (6).jpg)</string>
+     <string notr="true">border-image: url(:/imgs/Rectangle-50.png);</string>
     </property>
     <widget class="QPushButton" name="arrow">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
-       <x>60</x>
+       <x>70</x>
        <y>10</y>
        <width>21</width>
        <height>21</height>
@@ -58,23 +64,26 @@
     <widget class="QPushButton" name="check">
      <property name="geometry">
       <rect>
-       <x>150</x>
+       <x>160</x>
        <y>10</y>
        <width>21</width>
        <height>21</height>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">border-image: url(:/imgs/check.png);</string>
      </property>
      <property name="text">
-      <string>Y</string>
+      <string/>
      </property>
     </widget>
     <widget class="QPushButton" name="character">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
-       <x>90</x>
+       <x>100</x>
        <y>10</y>
        <width>21</width>
        <height>21</height>
@@ -87,14 +96,14 @@
     <widget class="QPushButton" name="cancel">
      <property name="geometry">
       <rect>
-       <x>120</x>
+       <x>130</x>
        <y>10</y>
        <width>21</width>
        <height>21</height>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">border-image: url(:/imgs/cancel.png);</string>
      </property>
      <property name="text">
       <string>X</string>
@@ -103,28 +112,112 @@
     <widget class="QPushButton" name="round">
      <property name="geometry">
       <rect>
-       <x>30</x>
+       <x>40</x>
        <y>10</y>
        <width>21</width>
        <height>21</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">border-image: url(:/imgs/round.png);</string>
+     </property>
      <property name="text">
-      <string>0</string>
+      <string/>
      </property>
     </widget>
     <widget class="QPushButton" name="rectan">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>10</x>
        <y>10</y>
        <width>21</width>
        <height>21</height>
       </rect>
      </property>
-     <property name="text">
-      <string>[]</string>
+     <property name="styleSheet">
+      <string notr="true">border-image: url(:/imgs/rec.png);</string>
      </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="ImgStrip" native="true">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>120</y>
+      <width>320</width>
+      <height>60</height>
+     </rect>
+    </property>
+    <widget class="QTextEdit" name="SizeRgbDisplay">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>0</y>
+       <width>260</width>
+       <height>60</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="ImgHoriVerti" native="true">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>60</width>
+       <height>60</height>
+      </rect>
+     </property>
+     <widget class="QGraphicsView" name="ImgShow">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>60</width>
+        <height>60</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="horizonLine">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>30</y>
+        <width>60</width>
+        <height>1</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(85, 255, 0);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="verticalLine">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>0</y>
+        <width>1</width>
+        <height>60</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(85, 255, 0);</string>
+      </property>
+      <property name="text">
+       <string>PushButton</string>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
