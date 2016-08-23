@@ -291,7 +291,7 @@ int ScreenShot::selectArea(int x, int y)
     //The click place is on the element in the cut area
     for(int i=0; i<drawHis.size(); i++) {
         QRect t = drawHis[i].getPt();
-        if(x>=t.x() && y>=t.y() && x<=t.x()+t.width() && y<t.y()+t.height()) {
+        if(x>=ap.bx()+t.x() && y>=ap.by()+t.y() && x<=ap.bx()+t.x()+t.width() && y<ap.by()+t.y()+t.height()) {
             selectIt = &drawHis[i];
             return i;
         }
