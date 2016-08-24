@@ -1,0 +1,13 @@
+﻿Build started 2016-08-24 12:33:13.
+     1>Project "F:\ScreenShot\windowsHooker\windowsHooker\windowsHooker.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         D:\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
+         main.cpp
+     1>f:\screenshot\windowshooker\windowshooker\main.cpp(21): error C2446: “<”: 没有从“int”到“char *[]”的转换
+                 从整型转换为指针类型要求 reinterpret_cast、C 样式转换或函数样式转换
+     1>f:\screenshot\windowshooker\windowshooker\main.cpp(21): error C2040: “<”:“char *[]”与“int”的间接寻址级别不同
+     1>Done Building Project "F:\ScreenShot\windowsHooker\windowsHooker\windowsHooker.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:01.28
