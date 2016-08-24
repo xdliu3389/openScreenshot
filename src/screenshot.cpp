@@ -372,7 +372,8 @@ void ScreenShot::update_img_rgb_area(int px, int py)
 void ScreenShot::update_size_font(int px, int py)
 {
     QImage tmp = top.toImage();
-    QColor colorRes = tmp.pixelColor(px, py);
+    QColor colorRes = tmp.pixel(px, py);
+    //QColor colorRes = tmp.pixelColor(px, py);   pixelColor is for linux qt, pixel is for windows qt
     int r = colorRes.red();
     int g = colorRes.green();
     int b = colorRes.blue();

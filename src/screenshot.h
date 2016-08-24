@@ -10,6 +10,7 @@
 #include <QClipboard>
 #include <QVector>
 #include <QStack>
+#include <QImage>
 #include <iostream>
 #include <string>
 #include "draw.h"
