@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/imgs">
-        <file>1 (6).jpg</file>
         <file>rec.png</file>
         <file>round.png</file>
         <file>check.png</file>
@@ -10,5 +9,6 @@
         <file>rec_press.png</file>
         <file>round_press.png</file>
         <file>Rectangle-50.png</file>
+        <file>screenIcon.png</file>
     </qresource>
 </RCC>

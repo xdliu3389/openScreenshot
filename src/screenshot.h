@@ -76,6 +76,9 @@ private:
     void exit_without_copy();
     void swap(int &n1, int &n2);
 
+    void create_actions();
+    void create_tray();
+
     bool mousePressed, cutAreaExits, cutAreaSelected;
     bool buttonClick[4];
     int sa;

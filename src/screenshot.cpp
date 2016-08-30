@@ -18,6 +18,8 @@ ScreenShot::ScreenShot(QWidget *parent) :
 //Set all the widgets initial position and status
 void ScreenShot::init_widgets()
 {
+    this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+
     //Hide most widget in the begining of program
     ui->widget->hide();
     ui->SizeRgbDisplay->setStyleSheet("background-color: rgb(0, 0, 0, 98);");
@@ -149,7 +151,7 @@ void ScreenShot::mouseMoveEvent(QMouseEvent *e)
 //Exit program when mouse double click
 void ScreenShot::mouseDoubleClickEvent(QMouseEvent *e)
 {
-    exit_without_copy();
+    this->close();
 }
 
 //Save file to clipbord when pressing return or enter
@@ -158,7 +160,6 @@ void ScreenShot::keyPressEvent(QKeyEvent *e)
 {
     if(e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
         copy_img_clipboard();
-        QApplication::exit();
     } else if(e->key() == Qt::Key_Escape) {
         ui->rectan->setStyleSheet("border-image: url(:/imgs/rec.png);");
         ui->round->setStyleSheet("border-image: url(:/imgs/round.png);");
